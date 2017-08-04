@@ -50,11 +50,11 @@ public class TextCrawler {
 
 
 	/** Get html code */
-	public class GetCode extends AsyncTask<String, Void, Void> {
+	public class GetCode extends AsyncTask<String, Void, SourceContent> {
 
-		private SourceContent sourceContent = new SourceContent();
 		private int imageQuantity;
 		private ArrayList<String> urls;
+		private Throwable thrownError;
 
 		public GetCode(int imageQuantity) {
 			this.imageQuantity = imageQuantity;
@@ -69,9 +69,11 @@ public class TextCrawler {
 		}
 
 		@Override
-		protected void onPostExecute(Void result) {
-			if (callback != null) {
-				callback.onPos(sourceContent, isNull());
+		protected void onPostExecute(SourceContent result) {
+			if(thrownError != null && callback != null){
+				callback.onError(result, thrownError);
+			} else if (callback != null) {
+				callback.onPos(result, isNull(result));
 			}
 			super.onPostExecute(result);
 		}
@@ -85,7 +87,8 @@ public class TextCrawler {
 		}
 
 		@Override
-		protected Void doInBackground(String... params) {
+		protected SourceContent doInBackground(String... params) {
+			SourceContent sourceContent = new SourceContent();
 			try {
 				// Don't forget the http:// or https://
 				urls = SearchUrls.matches(params[0]);
@@ -153,6 +156,7 @@ public class TextCrawler {
 
 							sourceContent.setSuccess(true);
 						} catch (Exception e) {
+							thrownError = e;
 							sourceContent.setSuccess(false);
 						}
 					}
@@ -166,17 +170,18 @@ public class TextCrawler {
 				sourceContent.setDescription(stripTags(sourceContent
 						.getDescription()));
 
-				return null;
+				return sourceContent;
 			} catch (Exception e){
+				thrownError = e;
 				Log.i("TextCrawler", e.getMessage());
-				return null;
+				return sourceContent;
 			}
 		}
 
 		/** Verifies if the content could not be retrieved */
-		public boolean isNull() {
-			return !sourceContent.isSuccess() && 
-				extendedTrim(sourceContent.getHtmlCode()).equals("") && 
+		public boolean isNull(SourceContent sourceContent) {
+			return !sourceContent.isSuccess() &&
+				extendedTrim(sourceContent.getHtmlCode()).equals("") &&
 				!isImage(sourceContent.getFinalUrl());
 		}
 

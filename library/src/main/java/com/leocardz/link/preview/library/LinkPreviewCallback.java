@@ -16,4 +16,6 @@ public interface LinkPreviewCallback {
 	 *            Indicates if the content is null.
 	 */
 	void onPos(SourceContent sourceContent, boolean isNull);
+
+	void onError(SourceContent sourceContent, Throwable t);
 }
