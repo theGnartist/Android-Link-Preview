@@ -1,6 +1,7 @@
 package com.leocardz.link.preview.library;
 
 import android.os.AsyncTask;
+import android.util.Log;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -167,6 +168,7 @@ public class TextCrawler {
 
 				return null;
 			} catch (Exception e){
+				Log.i("TextCrawler", e.getMessage());
 				return null;
 			}
 		}
