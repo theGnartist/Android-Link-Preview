@@ -20,7 +20,9 @@ public class SearchUrls {
 
 		String[] splitString = (text.split(" "));
 		for (String string : splitString) {
-
+			if(!string.contains("://")){
+				string = "http://" + string;
+			}
 			try {
 				URL item = new URL(string);
 				urls.add(item.toString());
