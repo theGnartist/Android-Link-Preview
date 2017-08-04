@@ -78,90 +78,97 @@ public class TextCrawler {
 		@Override
 		protected void onCancelled() {
 			super.onCancelled();
+			if(callback != null){
+				callback.onPos(null, true);
+			}
 		}
 
 		@Override
 		protected Void doInBackground(String... params) {
-			// Don't forget the http:// or https://
-			urls = SearchUrls.matches(params[0]);
+			try {
+				// Don't forget the http:// or https://
+				urls = SearchUrls.matches(params[0]);
 
-			if (urls.size() > 0)
-				sourceContent
-						.setFinalUrl(unshortenUrl(extendedTrim(urls.get(0))));
-			else
-				sourceContent.setFinalUrl("");
+				if (urls.size() > 0)
+					sourceContent
+							.setFinalUrl(unshortenUrl(extendedTrim(urls.get(0))));
+				else
+					sourceContent.setFinalUrl("");
 
-			if (!sourceContent.getFinalUrl().equals("")) {
-				if (isImage(sourceContent.getFinalUrl())
-						&& !sourceContent.getFinalUrl().contains("dropbox")) {
-					sourceContent.setSuccess(true);
-
-					sourceContent.getImages().add(sourceContent.getFinalUrl());
-
-					sourceContent.setTitle("");
-					sourceContent.setDescription("");
-
-				} else {
-					try {
-						Document doc = Jsoup
-								.connect(sourceContent.getFinalUrl())
-								.userAgent("Mozilla").get();
-
-						sourceContent.setHtmlCode(extendedTrim(doc.toString()));
-
-						HashMap<String, String> metaTags = getMetaTags(sourceContent
-								.getHtmlCode());
-
-						sourceContent.setMetaTags(metaTags);
-
-						sourceContent.setTitle(metaTags.get("title"));
-						sourceContent.setDescription(metaTags
-								.get("description"));
-
-						if (sourceContent.getTitle().equals("")) {
-							String matchTitle = Regex.pregMatch(
-									sourceContent.getHtmlCode(),
-									Regex.TITLE_PATTERN, 2);
-
-							if (!matchTitle.equals(""))
-								sourceContent.setTitle(htmlDecode(matchTitle));
-						}
-
-						if (sourceContent.getDescription().equals(""))
-							sourceContent
-									.setDescription(crawlCode(sourceContent
-											.getHtmlCode()));
-
-						sourceContent.setDescription(sourceContent
-								.getDescription().replaceAll(
-										Regex.SCRIPT_PATTERN, ""));
-
-						if (imageQuantity != NONE) {
-							if (!metaTags.get("image").equals(""))
-								sourceContent.getImages().add(
-										metaTags.get("image"));
-							else {
-								sourceContent.setImages(getImages(doc,
-										imageQuantity));
-							}
-						}
-
+				if (!sourceContent.getFinalUrl().equals("")) {
+					if (isImage(sourceContent.getFinalUrl())
+							&& !sourceContent.getFinalUrl().contains("dropbox")) {
 						sourceContent.setSuccess(true);
-					} catch (Exception e) {
-						sourceContent.setSuccess(false);
+
+						sourceContent.getImages().add(sourceContent.getFinalUrl());
+
+						sourceContent.setTitle("");
+						sourceContent.setDescription("");
+
+					} else {
+						try {
+							Document doc = Jsoup
+									.connect(sourceContent.getFinalUrl())
+									.userAgent("Mozilla").get();
+
+							sourceContent.setHtmlCode(extendedTrim(doc.toString()));
+
+							HashMap<String, String> metaTags = getMetaTags(sourceContent
+									.getHtmlCode());
+
+							sourceContent.setMetaTags(metaTags);
+
+							sourceContent.setTitle(metaTags.get("title"));
+							sourceContent.setDescription(metaTags
+									.get("description"));
+
+							if (sourceContent.getTitle().equals("")) {
+								String matchTitle = Regex.pregMatch(
+										sourceContent.getHtmlCode(),
+										Regex.TITLE_PATTERN, 2);
+
+								if (!matchTitle.equals(""))
+									sourceContent.setTitle(htmlDecode(matchTitle));
+							}
+
+							if (sourceContent.getDescription().equals(""))
+								sourceContent
+										.setDescription(crawlCode(sourceContent
+												.getHtmlCode()));
+
+							sourceContent.setDescription(sourceContent
+									.getDescription().replaceAll(
+											Regex.SCRIPT_PATTERN, ""));
+
+							if (imageQuantity != NONE) {
+								if (!metaTags.get("image").equals(""))
+									sourceContent.getImages().add(
+											metaTags.get("image"));
+								else {
+									sourceContent.setImages(getImages(doc,
+											imageQuantity));
+								}
+							}
+
+							sourceContent.setSuccess(true);
+						} catch (Exception e) {
+							sourceContent.setSuccess(false);
+						}
 					}
 				}
+
+				String[] finalLinkSet = sourceContent.getFinalUrl().split("&");
+				sourceContent.setUrl(finalLinkSet[0]);
+
+				sourceContent.setCannonicalUrl(cannonicalPage(sourceContent
+						.getFinalUrl()));
+				sourceContent.setDescription(stripTags(sourceContent
+						.getDescription()));
+
+				return null;
+			} catch (Exception e){
+				return null;
 			}
-
-			String[] finalLinkSet = sourceContent.getFinalUrl().split("&");
-			sourceContent.setUrl(finalLinkSet[0]);
-
-			sourceContent.setCannonicalUrl(cannonicalPage(sourceContent
-					.getFinalUrl()));
-			sourceContent.setDescription(stripTags(sourceContent
-					.getDescription()));
-
-			return null;
 		}
 
 		/** Verifies if the content could not be retrieved */
