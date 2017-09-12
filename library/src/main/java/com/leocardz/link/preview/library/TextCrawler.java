@@ -3,7 +3,9 @@ package com.leocardz.link.preview.library;
 import android.os.AsyncTask;
 import android.util.Log;
 
+import org.jsoup.Connection;
 import org.jsoup.Jsoup;
+import org.jsoup.helper.HttpConnection;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
@@ -113,10 +115,11 @@ public class TextCrawler {
 
 					} else {
 						try {
-							Document doc = Jsoup
+							 Connection.Response resp = Jsoup
 									.connect(sourceContent.getFinalUrl())
 									.ignoreContentType(true)
-									.userAgent("Mozilla").get();
+									.userAgent("Mozilla").execute();
+							Document doc = resp.parse();
 							sourceContent.setHtmlCode(extendedTrim(doc.toString()));
 
 							HashMap<String, String> metaTags = getMetaTags(sourceContent
