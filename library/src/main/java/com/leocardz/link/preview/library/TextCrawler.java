@@ -15,6 +15,8 @@ import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class TextCrawler {
 
@@ -115,8 +117,6 @@ public class TextCrawler {
 									.connect(sourceContent.getFinalUrl())
 									.ignoreContentType(true)
 									.userAgent("Mozilla").get();
-
-
 							sourceContent.setHtmlCode(extendedTrim(doc.toString()));
 
 							HashMap<String, String> metaTags = getMetaTags(sourceContent
@@ -407,6 +407,15 @@ public class TextCrawler {
 
 	/** Removes extra spaces and trim the string */
 	public static String extendedTrim(String content) {
+		String[] urlParts = content.split("\\?");
+		if(urlParts.length>1){
+			Pattern p = Pattern.compile("[^=&]+=(&|$)");
+			Matcher m = p.matcher(urlParts[1]);
+			if(m.find()){
+				urlParts[1] = urlParts[1].replace(m.group(),"");
+			}
+			content = urlParts[0]+"?"+urlParts[1];
+		}
 		return content.replaceAll("\\s+", " ").replace("\n", " ")
 				.replace("\r", " ").trim();
 	}
