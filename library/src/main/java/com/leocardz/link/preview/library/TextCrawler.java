@@ -2,6 +2,7 @@ package com.leocardz.link.preview.library;
 
 import android.os.AsyncTask;
 import android.util.Log;
+import android.webkit.MimeTypeMap;
 
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
@@ -115,11 +116,10 @@ public class TextCrawler {
 
 					} else {
 						try {
-							 Connection.Response resp = Jsoup
+							 Document doc = Jsoup
 									.connect(sourceContent.getFinalUrl())
 									.ignoreContentType(true)
-									.userAgent("Mozilla").execute();
-							Document doc = resp.parse();
+									.userAgent("Mozilla").get();
 							sourceContent.setHtmlCode(extendedTrim(doc.toString()));
 
 							HashMap<String, String> metaTags = getMetaTags(sourceContent
@@ -305,7 +305,22 @@ public class TextCrawler {
 
 	/** Verifies if the url is an image */
 	private boolean isImage(String url) {
-		return url.matches(Regex.IMAGE_PATTERN);
+		if(url.matches(Regex.IMAGE_PATTERN)){
+			return true;
+		}
+		try {
+			Connection.Response resp = Jsoup
+					.connect(url)
+					.ignoreContentType(true)
+					.userAgent("Mozilla").execute();
+			if(resp.contentType().contains("image")){
+				return true;
+			}
+
+		} catch (Exception e){
+			return false;
+		}
+		return false;
 	}
 
 	/**
