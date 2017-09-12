@@ -113,7 +113,9 @@ public class TextCrawler {
 						try {
 							Document doc = Jsoup
 									.connect(sourceContent.getFinalUrl())
+									.ignoreContentType(true)
 									.userAgent("Mozilla").get();
+
 
 							sourceContent.setHtmlCode(extendedTrim(doc.toString()));
 
