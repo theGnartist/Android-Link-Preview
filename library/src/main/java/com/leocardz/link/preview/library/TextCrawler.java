@@ -105,7 +105,9 @@ public class TextCrawler {
 					sourceContent.setFinalUrl("");
 
 				if (!sourceContent.getFinalUrl().equals("")) {
-					if (isImage(sourceContent.getFinalUrl())
+					sourceContent.setMimeType(getMimeType(sourceContent.getFinalUrl()));
+					if (sourceContent.getMimeType() != null
+							&& sourceContent.getMimeType().contains("image")
 							&& !sourceContent.getFinalUrl().contains("dropbox")) {
 						sourceContent.setSuccess(true);
 
@@ -321,6 +323,19 @@ public class TextCrawler {
 			return false;
 		}
 		return false;
+	}
+
+	private String getMimeType(String url){
+		try {
+			Connection.Response resp = Jsoup
+					.connect(url)
+					.ignoreContentType(true)
+					.userAgent("Mozilla").execute();
+			return resp.contentType();
+
+		} catch (Exception e){
+			return null;
+		}
 	}
 
 	/**

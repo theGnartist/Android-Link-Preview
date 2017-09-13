@@ -14,12 +14,21 @@ public class SourceContent {
 	private String url = "";
 	private String finalUrl = "";
 	private String cannonicalUrl = "";
+	private String mimeType = "";
 	private HashMap<String, String> metaTags = new HashMap<String, String>();
 
 	private List<String> images = new ArrayList<String>();
 	private String[] urlData = new String[2];
 
 	public SourceContent() {
+	}
+
+	public String getMimeType() {
+		return mimeType;
+	}
+
+	public void setMimeType(String mimeType) {
+		this.mimeType = mimeType;
 	}
 
 	/**
